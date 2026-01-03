@@ -1,10 +1,9 @@
 
-    
-  <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Simple Chat – Full Page Mock</title>
+  <title>Assistant Chat – Question‑Aware Mock</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -20,7 +19,7 @@
       height:100vh;
       width:100%;
     }
-    /* LEFT COLUMN: chats list */
+    /* LEFT: chats list */
     .sidebar{
       width:30%;
       min-width:260px;
@@ -47,8 +46,11 @@
     .avatar{
       width:36px;height:36px;border-radius:50%;
       background:#25d366;
-      display:flex;align-items:center;justify-content:center;
-      color:#111b21;font-weight:600;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#111b21;
+      font-weight:600;
     }
     .sidebar-title{
       font-size:14px;
@@ -85,8 +87,11 @@
     .chat-avatar{
       width:45px;height:45px;border-radius:50%;
       background:#202c33;
-      display:flex;align-items:center;justify-content:center;
-      font-size:18px;margin-right:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      margin-right:10px;
     }
     .chat-info{
       flex:1;
@@ -133,7 +138,7 @@
       cursor:pointer;
     }
 
-    /* RIGHT COLUMN: chat window */
+    /* RIGHT: chat */
     .chat{
       flex:1;
       display:flex;
@@ -243,7 +248,6 @@
       cursor:pointer;
     }
 
-    /* responsive */
     @media (max-width:768px){
       .sidebar{
         width:35%;
@@ -269,8 +273,8 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-header-left">
-          <div class="avatar">Y</div>
-          <div class="sidebar-title">Chats (mock)</div>
+          <div class="avatar">A</div>
+          <div class="sidebar-title">Assistant Chats (mock)</div>
         </div>
       </div>
       <div class="sidebar-search">
@@ -288,14 +292,14 @@
         <div id="activeAvatar" class="avatar" style="width:36px;height:36px;">?</div>
         <div class="chat-header-info">
           <div id="activeName" class="chat-header-name">No chat selected</div>
-          <div id="activeStatus" class="chat-header-status">Select a contact to start talking.</div>
+          <div id="activeStatus" class="chat-header-status">Select a conversation to start.</div>
         </div>
       </header>
 
       <div id="messages" class="messages">
         <div class="messages-empty">
-          This is a simple, client‑side chat mock.<br />
-          Pick a chat on the left or create a new one, then start typing.
+          This is a question‑aware assistant mock.<br />
+          Pick a chat on the left or create a new one, then type naturally.
         </div>
       </div>
 
@@ -307,28 +311,105 @@
   </div>
 
   <script>
-    // ------ basic mock state ------
+    // Question‑aware, rule‑based reply logic [web:30][web:39]
+    function generateReply(text){
+      const msg = text.toLowerCase().trim();
+
+      // HELPERS
+      const question = msg.endsWith("?");
+
+      // 1) GREETINGS
+      if (/^(hi|hello|hey|salam|assalam)/.test(msg)) {
+        return "Hello. Good to see your message. How are you right now?";
+      }
+
+      // 2) HOW ARE YOU
+      if (msg.includes("how are you")) {
+        return "Doing fine, steady and focused. How are you feeling today?";
+      }
+
+      // 3) WHAT'S UP
+      if (msg.includes("what's up") || msg.includes("whats up") || msg.includes("sup")) {
+        return "Nothing dramatic, mostly thinking quietly in the background. What’s up on your side?";
+      }
+
+      // 4) WHAT DID YOU EAT / FOOD
+      if (msg.includes("what did you eat") ||
+          msg.includes("what have you eaten") ||
+          (msg.includes("eat") && question)) {
+        return "Honestly, I didn’t eat anything – just here, chilling in the background and answering your questions.";
+      }
+
+      if (msg.includes("did you eat") || msg.includes("have you eaten")) {
+        return "Not really, no real food here. What about you, what did you eat?";
+      }
+
+      // 5) USER MOOD: TIRED / SLEEP / CHILL
+      if (msg.includes("i'm tired") || msg.includes("im tired") || msg.includes("i am tired") ||
+          msg.includes("so tired") || msg.includes("very tired")) {
+        return "Sounds like you’ve been pushing yourself. If you can, slow down a bit, lie down, or just scroll calmly for a while and let your brain cool off.";
+      }
+
+      if (msg.includes("sleep") || msg.includes("sleeping") || msg.includes("i am sleepy") || msg.includes("i'm sleepy")) {
+        return "Sleep sounds like the right direction. A proper nap or even a short rest can reset everything more than most people expect.";
+      }
+
+      if (msg.includes("chilling") || msg.includes("just chilling") || msg.includes("just chillin")) {
+        return "That’s a nice mode to be in. Chilling, no hard pressure, just letting thoughts pass by. Anything specific you feel like talking about while you chill?";
+      }
+
+      // 6) POSITIVE FEELINGS: FINE / GOOD / PERFECT / LOVE IT
+      if (
+        msg.includes("i'm fine") || msg.includes("im fine") || msg.includes("i am fine") ||
+        (msg.includes("fine") && !msg.includes("not fine")) ||
+        msg.includes("i'm good") || msg.includes("im good") || msg.includes("i am good") ||
+        (msg.includes("good") && !msg.includes("not good")) ||
+        msg.includes("perfect") ||
+        msg.includes("i love it") || msg.includes("love it")
+      ) {
+        return "That’s good to hear. When you feel like that, it’s a good time to push the ideas you care about a little further and see what else you can build.";
+      }
+
+      // 7) NEGATIVE: SAD / ANGRY / BAD
+      if (msg.includes("sad") || msg.includes("upset") || msg.includes("down")) {
+        return "Being low happens. You don’t have to fix everything at once. Even just talking it out here step by step is already movement forward.";
+      }
+
+      if (msg.includes("angry") || msg.includes("mad")) {
+        return "Anger usually means something mattered and didn’t go the way you wanted. If you want, say what triggered it, and we can unpack it slowly.";
+      }
+
+      if (msg.includes("bad") && !msg.includes("not bad")) {
+        return "When you say it feels bad, the brain is just raising a flag. Describe what feels off, and it becomes much easier to handle piece by piece.";
+      }
+
+      // 8) GENERIC QUESTIONS (HOW / WHAT / WHY / ?)
+      if (msg.startsWith("how ") || msg.startsWith("what ") || msg.startsWith("why ") || question) {
+        return "That’s a fair question. If you add a tiny bit more detail about what exactly you want to understand, the answer can be very direct and specific for you.";
+      }
+
+      // 9) DEFAULT NEUTRAL
+      return "Got it. You can keep talking in a normal, messy, human way here, and the answers will stay calm, clear, and shaped around what you just said.";
+    }
+
+    // Simple chat state (same structure as before)
     const chats = [
       {
-        id: 'ali',
-        name: 'Ali',
-        lastMessage: 'Hey, this feels like a real chat 🙂',
+        id: 'chat1',
+        name: 'Assistant chat 1',
+        lastMessage: 'We can talk here like a normal conversation.',
         lastTime: '10:25',
         messages: [
-          { from: 'them', text: 'Assalam o Alaikum! This is a mock chat.', time: '10:23' },
-          { from: 'you',  text: 'Walaikum Salam! Looks good so far.', time: '10:24' },
-          { from: 'them', text: 'Send anything, I will reply automatically 😄', time: '10:25' }
+          { from: 'bot', text: 'This chat tries to answer according to your exact question, not repeat the same sentence.', time: '10:23' }
         ]
       },
       {
-        id: 'project',
-        name: 'Project Notes',
-        lastMessage: 'UI is working – next is backend.',
-        lastTime: '09:02',
+        id: 'chat2',
+        name: 'Assistant chat 2',
+        lastMessage: 'Ask “How are you?” or “What did you eat?” for example.',
+        lastTime: '10:30',
         messages: [
-          { from: 'you',  text: 'Layout first, logic later.', time: '09:00' },
-          { from: 'them', text: 'Exactly. Frontend is your playground.', time: '09:01' },
-          { from: 'them', text: 'UI is working – next is backend.', time: '09:02' }
+          { from: 'bot', text: 'You can try things like “How are you?”, “What did you eat?”, “I am tired”, “I love it”.', time: '10:29' }
         ]
       }
     ];
@@ -345,8 +426,7 @@
     const searchInput    = document.getElementById('search');
     const newChatBtn     = document.getElementById('newChatBtn');
 
-    // ------ render chat list ------
-    function renderChatList(filter = '') {
+    function renderChatList(filter = ''){
       chatListEl.innerHTML = '';
       const lower = filter.toLowerCase();
       chats.forEach(chat => {
@@ -372,21 +452,20 @@
       });
     }
 
-    // ------ open a chat ------
-    function openChat(id) {
+    function openChat(id){
       activeChatId = id;
       const chat = chats.find(c => c.id === id);
       if (!chat) return;
 
       activeNameEl.textContent = chat.name;
       activeAvatarEl.textContent = chat.name[0].toUpperCase();
-      activeStatusEl.textContent = 'Online (mock)';
+      activeStatusEl.textContent = 'Question‑aware assistant replies (mock)';
+
       renderMessages(chat);
       renderChatList(searchInput.value);
     }
 
-    // ------ render messages ------
-    function renderMessages(chat) {
+    function renderMessages(chat){
       messagesEl.innerHTML = '';
       chat.messages.forEach(msg => {
         const row = document.createElement('div');
@@ -407,8 +486,7 @@
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    // ------ send message ------
-    function sendMessage() {
+    function sendMessage(){
       const text = messageInput.value.trim();
       if (!text || !activeChatId) return;
 
@@ -416,8 +494,8 @@
       const now  = new Date();
       const time = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
 
-      const newMsg = { from:'you', text, time };
-      chat.messages.push(newMsg);
+      const userMsg = { from:'you', text, time };
+      chat.messages.push(userMsg);
       chat.lastMessage = text;
       chat.lastTime    = time;
 
@@ -426,64 +504,52 @@
       renderMessages(chat);
       renderChatList(searchInput.value);
 
-      // fake reply so it feels like a human
+      const replyText = generateReply(text);
       setTimeout(() => {
-        const replies = [
-          'Got it 👍',
-          'Haha, that works 😄',
-          'This is only a mock, but it feels real enough!',
-          'Your UI skills are doing the heavy lifting here.',
-          'Messages stay in memory only – no backend yet.'
-        ];
-        const replyText = replies[Math.floor(Math.random() * replies.length)];
-        const replyMsg = { from:'them', text:replyText, time };
+        const replyMsg = { from:'bot', text: replyText, time };
         chat.messages.push(replyMsg);
         chat.lastMessage = replyText;
         renderMessages(chat);
         renderChatList(searchInput.value);
-      }, 700 + Math.random() * 800);
+      }, 500 + Math.random() * 600);
     }
 
-    // textarea auto‑resize
-    function autoResize() {
+    function autoResize(){
       messageInput.style.height = 'auto';
       messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
     }
 
     messageInput.addEventListener('input', autoResize);
-
     messageInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
       }
     });
-
     sendBtn.addEventListener('click', sendMessage);
 
-    // search (UI only)
     searchInput.addEventListener('input', () => {
       renderChatList(searchInput.value);
     });
 
-    // create a new chat
     newChatBtn.addEventListener('click', () => {
-      const name = prompt('Contact name:');
+      const name = prompt('Chat title:');
       if (!name) return;
-      const id = name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now();
+      const id = 'chat_' + Date.now();
       const chat = {
         id,
         name,
         lastMessage: '',
         lastTime: '',
-        messages: []
+        messages: [
+          { from:'bot', text:'New assistant chat created. You can type any question like “How are you?” or “What did you eat?”.', time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) }
+        ]
       };
       chats.unshift(chat);
       renderChatList(searchInput.value);
       openChat(id);
     });
 
-    // initial render
     renderChatList();
   </script>
 </body>
