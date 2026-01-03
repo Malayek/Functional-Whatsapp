@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Clone</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            height: 100vh; 
+            background: #000;
+            overflow: hidden;
+        }
+        .app { display: flex; height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { 
+            width: 0; 
+            background: #111b21; 
+            color: #e9edef; 
+            transition: width 0.3s ease; 
+            position: relative;
+            overflow-y: auto;
+        }
+        .sidebar.open { width: 30%; min-width: 350px; }
+        .sidebar-header { 
+            padding: 16px; 
+            background: #202c33; 
+            border-bottom: 1px solid #2a3942; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+        }
+        .user-info { flex: 1; }
+        .user-avatar { 
+            width: 40px; height: 40px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            display: flex; align-items: center; justify-content: center; 
+            color: white; font-weight: bold;
+        }
+        .new-chat-btn { 
+            background: #25d366; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            color: white; 
+            cursor: pointer; 
+        }
+        .chat-list { padding: 8px; }
+        .chat-item { 
+            display: flex; 
+            gap: 12px; 
+            padding: 12px; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            transition: background 0.2s;
+        }
+        .chat-item:hover, .chat-item.active { background: rgba(29, 155, 240, 0.1); }
+        .chat-avatar { 
+            width: 50px; height: 50px; 
+            border-radius: 50%; 
+            background: #25d366; 
+            display: flex; align-items: center; justify-content: center; 
+            color: white; font-weight: bold; font-size: 18px;
+        }
+        .chat-info { flex: 1; }
+        .chat-name { font-weight: 500; margin-bottom: 4px; }
+        .chat-preview { font-size: 14px; color: #8696a0; opacity: 0.8; }
+        .online-status { position: absolute; bottom: 4px; right: 8px; width: 12px; height: 12px; background: #25d366; border-radius: 50%; border: 2px solid #111b21; }
+        
+        /* Main Chat */
+        .chat-main { flex: 1; display: flex; flex-direction: column; background: #0b141a; }
+        .chat-header { 
+            padding: 16px 24px; 
+            background: #202c33; 
+            border-bottom: 1px solid #2a3942; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+        }
+        .back-btn { background: none; border: none; color: #e9edef; font-size: 20px; cursor: pointer; padding: 8px; border-radius: 50%; }
+        .chat-header-info h3 { margin: 0; }
+        .chat-header-info p { color: #8696a0; font-size: 14px; }
+        .call-btn { background: none; border: none; color: #e9edef; font-size: 20px; cursor: pointer; padding: 8px; border-radius: 50%; margin-left: auto; }
+        
+        .messages-container { 
+            flex: 1; 
+            padding: 24px; 
+            overflow-y: auto; 
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.03"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.03"/><circle cx="50" cy="10" r="0.5" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') #0b141a;
+        }
+        .message { 
+            display: flex; 
+            margin-bottom: 24px; 
+            animation: slideIn 0.3s ease;
+        }
+        .message.sent { justify-content: flex-end; }
+        .message.received { justify-content: flex-start; }
+        .message-bubble { 
+            max-width: 60%; 
+            padding: 12px 16px; 
+            border-radius: 12px; 
+            position: relative;
+        }
+        .message.sent .message-bubble { 
+            background: #005c4b; 
+            color: white; 
+            border-bottom-right-radius: 4px;
+        }
+        .message.received .message-bubble { 
+            background: #202c33; 
+            color: #e9edef; 
+            border-bottom-left-radius: 4px;
+        }
+        .message-time { 
+            font-size: 12px; 
+            opacity: 0.7; 
+            margin-top: 4px;
+        }
+        .message-status { 
+            font-size: 12px; 
+            margin-left: 4px; 
+        }
+        
+        /* Input Area */
+        .input-area { 
+            padding: 16px 24px; 
+            background: #202c33; 
+            display: flex; 
+            gap: 12px; 
+            align-items: flex-end;
+        }
+        .input-group { flex: 1; position: relative; }
+        .message-input { 
+            width: 100%; 
+            padding: 12px 16px 12px 50px; 
+            border: none; 
+            border-radius: 24px; 
+            background: #2a3942; 
+            color: #e9edef; 
+            font-size: 16px;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+        }
+        .message-input::placeholder { color: #8696a0; }
+        .emoji-btn, .attach-btn { 
+            background: none; 
+            border: none; 
+            color: #8696a0; 
+            font-size: 20px; 
+            cursor: pointer; 
+            padding: 8px;
+        }
+        .send-btn { 
+            background: #25d366; 
+            border: none; 
+            width: 48px; height: 48px; 
+            border-radius: 50%; 
+            color: white; 
+            font-size: 20px; 
+            cursor: pointer;
+        }
+        
+        /* Auth Screens */
+        .auth-screen { 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: linear-gradient(135deg, #128c7e 0%, #25d366 100%); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000;
+        }
+        .auth-container { 
+            background: rgba(255,255,255,0.95); 
+            padding: 48px 32px; 
+            border-radius: 16px; 
+            text-align: center; 
+            max-width: 400px; 
+            width: 90%;
+        }
+        .auth-logo { 
+            width: 80px; height: 80px; 
+            background: rgba(255,255,255,0.2); 
+            border-radius: 50%; 
+            margin: 0 auto 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 32px; 
+            color: white;
+        }
+        .auth-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; color: #111b21; }
+        .auth-subtitle { color: #667781; margin-bottom: 32px; }
+        .input-field { 
+            width: 100%; 
+            padding: 16px; 
+            border: 1px solid #e9edef; 
+            border-radius: 8px; 
+            margin-bottom: 16px; 
+            font-size: 16px;
+        }
+        .auth-btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: #25d366; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 500; 
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        .auth-toggle { color: #25d366; cursor: pointer; }
+        
+        /* Call Modal */
+        .call-modal { 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1001;
+        }
+        .call-container { 
+            background: #111b21; 
+            padding: 48px 24px; 
+            border-radius: 16px; 
+            text-align: center; 
+            color: white;
+        }
+        .call-avatar { 
+            width: 120px; height: 120px; 
+            border-radius: 50%; 
+            background: #25d366; 
+            margin: 0 auto 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 48px; 
+            font-weight: bold;
+        }
+        .call-name { font-size: 24px; margin-bottom: 8px; }
+        .call-controls { display: flex; gap: 24px; justify-content: center; margin-top: 32px; }
+        .call-btn-large { 
+            width: 72px; height: 72px; 
+            border-radius: 50%; 
+            border: none; 
+            font-size: 24px; 
+            cursor: pointer;
+        }
+        .call-accept { background: #00d45f; color: white; }
+        .call-decline { background: #ff4757; color: white; }
+        
+        /* Animations */
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-10px); } }
+        
+        .typing-indicator { display: flex; align-items: center; gap: 4px; padding: 12px 16px; }
+        .typing-dot { width: 8px; height: 8px; background: #8696a0; border-radius: 50%; animation: typing 1.4s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar.open { width: 100%; }
+            .messages-container { padding: 16px; }
+            .input-area { padding: 12px 16px; }
+        }
+        
+        /* Emoji picker */
+        .emoji-picker { 
+            position: absolute; 
+            bottom: 70px; 
+            left: 16px; 
+            background: #2a3942; 
+            border-radius: 12px; 
+            padding: 16px; 
+            display: none; 
+            max-width: 300px; 
+            max-height: 200px; 
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .emoji { 
+            font-size: 24px; 
+            cursor: pointer; 
+            padding: 8px; 
+            border-radius: 8px; 
+            display: inline-block; 
+            margin: 2px;
+        }
+        .emoji:hover { background: #3a4a52; }
+    </style>
+</head>
+<body>
+    <!-- Auth Screen -->
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-container">
+            <div class="auth-logo">📱</div>
+            <h1 class="auth-title">WhatsApp</h1>
+            <p class="auth-subtitle">Send and receive messages securely</p>
+            <input type="text" id="phoneInput" class="input-field" placeholder="Phone number (+92xxxxxxxxx)" maxlength="15">
+            <input type="text" id="nameInput" class="input-field" placeholder="Your name">
+            <button class="auth-btn" onclick="login()">Start Chatting</button>
+            <div style="font-size: 14px; color: #667781;">
+                By clicking Start Chatting, you agree to our <a href="#" style="color: #25d366;">Terms</a> and <a href="#" style="color: #25d366;">Privacy Policy</a>.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app" style="display: none;">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                </div>
+                <button class="new-chat-btn" onclick="addNewContact()">
+                    <i class="fas fa-plus"></i> New Chat
+                </button>
+            </div>
+            <div class="chat-list" id="chatList">
+                <!-- Dynamic chat items -->
+            </div>
+        </div>
+
+        <!-- Chat Main -->
+        <div class="chat-main">
+            <div class="chat-header" id="chatHeader" style="display: none;">
+                <button class="back-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="chat-header-info">
+                    <div class="user-avatar" id="chatAvatar"></div>
+                    <h3 id="chatName"></h3>
+                    <p id="chatStatus">online</p>
+                </div>
+                <div class="call-btn" onclick="startCall()">
+                    <i class="fas fa-phone"></i>
+                </div>
+            </div>
+            
+            <div class="messages-container" id="messagesContainer">
+                <div style="text-align: center; color: #8696a0; padding: 100px 0; display: none;" id="noChatSelected">
+                    <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <h3>Select a chat to start messaging</h3>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <div class="input-group">
+                    <textarea id="messageInput" class="message-input" placeholder="Type a message" rows="1"></textarea>
+                    <div class="emoji-picker" id="emojiPicker">
+                        <span class="emoji" onclick="addEmoji('😀')">😀</span>
+                        <span class="emoji" onclick="addEmoji('😂')">😂</span>
+                        <span class="emoji" onclick="addEmoji('❤️')">❤️</span>
+                        <span class="emoji" onclick="addEmoji('👍')">👍</span>
+                        <span class="emoji" onclick="addEmoji('🔥')">🔥</span>
+                        <span class="emoji" onclick="addEmoji('🎉')">🎉</span>
+                        <span class="emoji" onclick="addEmoji('😎')">😎</span>
+                        <span class="emoji" onclick="addEmoji('🙌')">🙌</span>
+                        <span class="emoji" onclick="addEmoji('💯')">💯</span>
+                        <span class="emoji" onclick="addEmoji('✨')">✨</span>
+                    </div>
+                </div>
+                <button class="emoji-btn" onclick="toggleEmojiPicker()">
+                    <i class="fas fa-smile"></i>
+                </button>
+                <button class="attach-btn">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call Modal -->
+    <div id="callModal" class="call-modal">
+        <div class="call-container">
+            <div class="call-avatar" id="callAvatar">A</div>
+            <div class="call-name" id="callName">Calling...</div>
+            <div style="color: #8696a0; margin-bottom: 32px;">Ringing</div>
+            <div class="call-controls">
+                <button class="call-btn-large call-decline" onclick="endCall()">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentUser = {};
+        let chats = JSON.parse(localStorage.getItem('chats')) || [];
+        let currentChat = null;
+        let peer = null;
+        let connections = {};
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const userData = JSON.parse(localStorage.getItem('currentUser'));
+            if (userData) {
+                currentUser = userData;
+                showApp();
+                loadChats();
+                initPeerJS();
+            }
+        });
+
+        function login() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            const name = document.getElementById('nameInput').value.trim();
+            
+            if (!phone || !name) {
+                alert('Please enter phone number and name');
+                return;
+            }
+            
+            currentUser = { id: phone, name, avatar: name.charAt(0).toUpperCase() };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            chats.push({ id: Date.now().toString(), name: 'Welcome!', messages: [], lastMessage: 'Say hello to get started!', timestamp: Date.now() });
+            localStorage.setItem('chats', JSON.stringify(chats));
+            
+            showApp();
+            loadChats();
+            initPeerJS();
+        }
+
+        function showApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        function loadChats() {
+            const chatList = document.getElementById('chatList');
+            chatList.innerHTML = '';
+            
+            chats.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.onclick = () => selectChat(chat);
+                chatItem.innerHTML = `
+                    <div class="chat-avatar">${chat.avatar || chat.name.charAt(0).toUpperCase()}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${chat.name}</div>
+                        <div class="chat-preview">${chat.lastMessage || ''}</div>
+                    </div>
+                    ${chat.online ? '<div class="online-status"></div>' : ''}
+                `;
+                chatList.appendChild(chatItem);
+            });
+        }
+
+        function selectChat(chat) {
+            currentChat = chat;
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('noChatSelected').style.display = 'none';
+            document.getElementById('chatAvatar').textContent = chat.avatar || chat.name.charAt(0).toUpperCase();
+            document.getElementById('chatName').textContent = chat.name;
+            document.getElementById('chatStatus').textContent = chat.online ? 'online' : 'last seen recently';
+            
+            loadMessages(chat);
+        }
+
+        function loadMessages(chat) {
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+            
+            chat.messages.forEach(msg => {
+                addMessageToUI(msg, false);
+            });
+            
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (!text || !currentChat) return;
+            
+            const message = {
+                id: Date.now().toString(),
+                text,
+                sender: currentUser.id,
+                timestamp: Date.now(),
+                status: 'sent'
+            };
+            
+            currentChat.messages.push(message);
+            currentChat.lastMessage = text;
+            currentChat.timestamp = Date.now();
+            
+            // Update local storage
+            saveChats();
+            addMessageToUI(message);
+            input.value = '';
+            
+            // Auto-resize textarea
+            input.style.height = 'auto';
+            
+            // Send via PeerJS if connection exists
+            if (connections[currentChat.id]) {
+                connections[currentChat.id].send(JSON.stringify({
+                    type: 'message',
+                    data: message
+                }));
+            }
+        }
+
+        function addMessageToUI(message, animate = true) {
+            const container = document.getElementById('messagesContainer');
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${message.sender === currentUser.id ? 'sent' : 'received'}`;
+            
+            if (animate) {
+                messageEl.style.animation = 'slideIn 0.3s ease';
+            }
+            
+            const time = new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            messageEl.innerHTML = `
+                <div class="message-bubble">
+                    ${message.text}
+                    <div class="message-time">
+                        ${time}
+                        ${message.sender === currentUser.id ? `<span class="message-status">✓✓</span>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(messageEl);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function addNewContact() {
+            const name = prompt('Enter contact name:');
+            const phone = prompt('Enter phone number (+92xxxxxxxxx):');
+            
+            if (name && phone) {
+                const newChat = {
+                    id: phone,
+                    name,
+                    avatar: name.charAt(0).toUpperCase(),
+                    messages: [],
+                    lastMessage: '',
+                    timestamp: Date.now(),
+                    online: Math.random() > 0.5
+                };
+                chats.unshift(newChat);
+                saveChats();
+                loadChats();
+            }
+        }
+
+        function saveChats() {
+            localStorage.setItem('chats', JSON.stringify(chats));
+        }
+
+        // Real-time features
+        function initPeerJS() {
+            peer = new Peer(currentUser.id);
+            
+            peer.on('open', function(id) {
+                console.log('Peer connected:', id);
+            });
+            
+            peer.on('connection', function(conn) {
+                const chatId = conn.peer;
+                connections[chatId] = conn;
+                
+                // Update chat online status
+                const chat = chats.find(c => c.id === chatId);
+                if (chat) {
+                    chat.online = true;
+                    loadChats();
+                }
+                
+                conn.on('data', function(data) {
+                    const msg = JSON.parse(data);
+                    if (msg.type === 'message') {
+                        const chat = chats.find(c => c.id === chatId);
+                        if (chat && currentChat?.id === chatId) {
+                            addMessageToUI(msg.data);
+                        }
+                        chat.messages.push(msg.data);
+                        chat.lastMessage = msg.data.text;
+                        chat.timestamp = Date.now();
+                        saveChats();
+                        loadChats();
+                    }
+                });
+                
+                conn.on('close', function() {
+                    delete connections[chatId];
+                    const chat = chats.find(c => c.id === chatId);
+                    if (chat) {
+                        chat.online = false;
+                        loadChats();
+                    }
+                });
+            });
+        }
+
+        function startCall() {
+            if (!currentChat) return;
+            
+            document.getElementById('callAvatar').textContent = currentChat.avatar || currentChat.name.charAt(0).toUpperCase();
+            document.getElementById('callName').textContent = currentChat.name;
+            document.getElementById('callModal').style.display = 'flex';
+            
+            // Simulate call (in production, integrate WebRTC)
+            setTimeout(() => {
+                document.getElementById('callName').textContent = 'Answered';
+            }, 3000);
+        }
+
+        function endCall() {
+            document.getElementById('callModal').style.display = 'none';
+        }
+
+        // UI Helpers
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.getElementById('messageInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emojiPicker');
+            picker.style.display = picker.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function addEmoji(emoji) {
+            const input = document.getElementById('messageInput');
+            const cursorPos = input.selectionStart;
+            const text = input.value;
+            input.value = text.substring(0, cursorPos) + emoji + text.substring(cursorPos);
+            input.focus();
+            document.getElementById('emojiPicker').style.display = 'none';
+        }
+
+        // Close emoji picker on outside click
+        document.addEventListener('click', function(e) {
+            const picker = document.getElementById('emojiPicker');
+            const emojiBtn = document.querySelector('.emoji-btn');
+            if (!picker.contains(e.target) && !emojiBtn.contains(e.target)) {
+                picker.style.display = 'none';
+            }
+        });
+
+        // Simulate typing indicator
+        let typingTimer;
+        document.getElementById('messageInput').addEventListener('input', function() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {}, 1000);
+        });
+    </script>
+</body>
+</html>
