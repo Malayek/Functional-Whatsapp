@@ -1,1095 +1,490 @@
-<!DOCTYPE html>
+
+    
+  <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>ChatGPT + Chat Mock UI</title>
+  <title>Simple Chat – Full Page Mock</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Icons -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
-    :root{
-      --bg-main:#050816;
-      --bg-sidebar:#050816;
-      --bg-chat:#050816;
-      --bg-message-user:#1f2937;
-      --bg-message-bot:#020617;
-      --border-subtle:#1f2933;
-      --accent:#22c55e;
-      --accent-soft:rgba(34,197,94,0.15);
-      --text-main:#e5e7eb;
-      --text-muted:#9ca3af;
-      --radius-lg:18px;
-    }
-    *{margin:0;padding:0;box-sizing:border-box}
+    *{margin:0;padding:0;box-sizing:border-box;}
     body{
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:radial-gradient(circle at top, #0f172a, #020617 60%);
-      color:var(--text-main);
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:12px;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      background:#0b141a;
+      color:#e9edef;
+      height:100vh;
+      overflow:hidden;
     }
     .app{
-      width:100%;
-      max-width:1200px;
-      height:90vh;
-      max-height:850px;
-      background:rgba(15,23,42,0.92);
-      border-radius:24px;
-      border:1px solid rgba(148,163,184,0.2);
-      box-shadow:0 30px 100px rgba(0,0,0,0.65);
       display:flex;
-      overflow:hidden;
-      backdrop-filter:blur(18px);
+      height:100vh;
+      width:100%;
     }
-
-    /* LEFT: CHAT LIST (WhatsApp style mock) */
+    /* LEFT COLUMN: chats list */
     .sidebar{
       width:30%;
       min-width:260px;
-      background:radial-gradient(circle at top left,#020617,#020617 40%,#020617);
-      border-right:1px solid var(--border-subtle);
+      max-width:360px;
+      background:#111b21;
+      border-right:1px solid #202c33;
       display:flex;
       flex-direction:column;
     }
     .sidebar-header{
       height:60px;
-      padding:0 16px;
-      border-bottom:1px solid var(--border-subtle);
+      background:#202c33;
+      border-bottom:1px solid #202c33;
       display:flex;
       align-items:center;
       justify-content:space-between;
+      padding:0 16px;
     }
     .sidebar-header-left{
       display:flex;
       align-items:center;
       gap:10px;
     }
-    .sidebar-badge{
-      font-size:11px;
-      padding:2px 8px;
-      border-radius:999px;
-      background:rgba(148,163,184,0.08);
-      color:var(--text-muted);
-    }
-    .logo-dot{
-      width:28px;height:28px;border-radius:999px;
-      background:radial-gradient(circle at 30% 0,#22c55e,#15803d);
+    .avatar{
+      width:36px;height:36px;border-radius:50%;
+      background:#25d366;
       display:flex;align-items:center;justify-content:center;
-      color:white;font-size:15px;font-weight:700;
-      box-shadow:0 0 0 1px rgba(15,23,42,0.8);
+      color:#111b21;font-weight:600;
     }
-    .sidebar-actions i{
-      color:var(--text-muted);
-      margin-left:16px;
-      cursor:pointer;
+    .sidebar-title{
       font-size:14px;
     }
     .sidebar-search{
-      padding:8px 10px;
-      border-bottom:1px solid var(--border-subtle);
+      padding:8px;
+      border-bottom:1px solid #202c33;
     }
-    .sidebar-search-inner{
-      background:#020617;
-      border-radius:999px;
-      display:flex;
-      align-items:center;
-      padding:4px 10px;
-      border:1px solid rgba(148,163,184,0.3);
-    }
-    .sidebar-search-inner input{
+    .sidebar-search input{
+      width:100%;
+      background:#202c33;
       border:none;
       outline:none;
-      background:transparent;
-      color:var(--text-main);
+      border-radius:8px;
+      padding:8px 10px;
+      color:#e9edef;
       font-size:13px;
-      padding:6px 8px;
-      flex:1;
     }
-    .sidebar-search-inner i{
-      color:var(--text-muted);
-      font-size:13px;
-      margin-right:6px;
-    }
-
     .chat-list{
       flex:1;
       overflow-y:auto;
       scrollbar-width:thin;
-      scrollbar-color:rgba(55,65,81,0.8) transparent;
+      scrollbar-color:#374151 transparent;
     }
     .chat-item{
       display:flex;
-      padding:9px 12px;
+      padding:10px 12px;
       cursor:pointer;
-      border-bottom:1px solid rgba(15,23,42,0.9);
-      transition:background 0.15s;
+      border-bottom:1px solid #202c33;
+      transition:background .12s;
     }
-    .chat-item:hover{background:rgba(17,24,39,0.9);}
-    .chat-item.active{
-      background:linear-gradient(90deg,rgba(22,163,74,0.16),rgba(15,23,42,0.9));
-    }
-
+    .chat-item:hover{background:#202c33;}
+    .chat-item.active{background:#202c33;}
     .chat-avatar{
-      width:40px;height:40px;border-radius:999px;
-      background:#020617;
-      border:1px solid rgba(148,163,184,0.5);
+      width:45px;height:45px;border-radius:50%;
+      background:#202c33;
       display:flex;align-items:center;justify-content:center;
-      font-size:16px;font-weight:600;
-      margin-right:10px;
-      position:relative;
-      color:var(--text-main);
+      font-size:18px;margin-right:10px;
     }
-    .chat-online-dot{
-      position:absolute;
-      bottom:0;
-      right:0;
-      width:10px;height:10px;border-radius:999px;
-      background:#22c55e;
-      border:2px solid #020617;
-    }
-    .chat-text{
+    .chat-info{
       flex:1;
       min-width:0;
     }
     .chat-top-row{
       display:flex;
       justify-content:space-between;
-      margin-bottom:2px;
+      margin-bottom:4px;
     }
     .chat-name{
-      font-size:13px;
+      font-size:14px;
       font-weight:500;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
     .chat-time{
-      font-size:10px;
-      color:var(--text-muted);
-      margin-left:8px;
+      font-size:11px;
+      color:#8696a0;
       flex-shrink:0;
-    }
-    .chat-preview-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
+      margin-left:8px;
     }
     .chat-preview{
-      color:var(--text-muted);
-      font-size:11px;
+      font-size:12px;
+      color:#8696a0;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      max-width:150px;
-    }
-    .chat-badge{
-      min-width:16px;height:16px;border-radius:999px;
-      background:var(--accent);
-      color:#022c22;
-      font-size:10px;
-      display:flex;align-items:center;justify-content:center;
-      font-weight:600;
     }
     .sidebar-footer{
-      padding:8px 12px;
-      border-top:1px solid var(--border-subtle);
+      padding:8px;
+      border-top:1px solid #202c33;
       display:flex;
       justify-content:center;
     }
     .sidebar-footer button{
-      border-radius:999px;
       border:none;
-      padding:6px 14px;
-      background:rgba(34,197,94,0.16);
-      color:var(--accent);
-      font-size:11px;
-      letter-spacing:0.03em;
-      text-transform:uppercase;
-      display:flex;
-      align-items:center;
-      gap:6px;
-      cursor:default;
+      background:#25d366;
+      color:#111b21;
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:13px;
+      cursor:pointer;
     }
 
-    /* RIGHT: CHATGPT-LIKE MAIN CHAT AREA */
-    .chat-main{
+    /* RIGHT COLUMN: chat window */
+    .chat{
       flex:1;
       display:flex;
       flex-direction:column;
-      background:radial-gradient(circle at 0 0,#020617,#020617 40%,#020617);
-      position:relative;
+      background:#0b141a;
     }
     .chat-header{
       height:60px;
-      border-bottom:1px solid var(--border-subtle);
+      background:#202c33;
+      border-bottom:1px solid #202c33;
+      display:flex;
+      align-items:center;
       padding:0 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .chat-header-left{
-      display:flex;
-      align-items:center;
       gap:10px;
     }
-    .chat-title{
+    .chat-header-info{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .chat-header-name{
       font-size:14px;
       font-weight:500;
     }
-    .chat-subtitle{
-      font-size:11px;
-      color:var(--text-muted);
-    }
-    .chat-header-logo{
-      width:26px;height:26px;border-radius:8px;
-      background:radial-gradient(circle at 30% 0,#22c55e,#16a34a);
-      display:flex;align-items:center;justify-content:center;
-      color:white;font-size:14px;font-weight:700;
-      box-shadow:0 0 0 1px rgba(15,23,42,0.8);
-    }
-    .chat-header-right{
-      display:flex;align-items:center;gap:12px;
-      color:var(--text-muted);
+    .chat-header-status{
       font-size:12px;
-    }
-    .status-dot{
-      width:8px;height:8px;border-radius:999px;
-      background:var(--accent);
-      box-shadow:0 0 0 4px rgba(34,197,94,0.16);
+      color:#8696a0;
     }
 
-    /* Messages area */
     .messages{
       flex:1;
-      padding:16px 18px;
+      padding:16px 24px;
       overflow-y:auto;
+      background:#0b141a;
       scrollbar-width:thin;
-      scrollbar-color:rgba(55,65,81,0.8) transparent;
+      scrollbar-color:#374151 transparent;
       display:flex;
       flex-direction:column;
-      gap:10px;
     }
-    .system-pill{
-      align-self:center;
-      font-size:11px;
-      color:var(--text-muted);
-      padding:4px 10px;
-      border-radius:999px;
-      background:rgba(15,23,42,0.9);
-      border:1px dashed rgba(148,163,184,0.4);
-      margin-bottom:4px;
-    }
-    .message-row{
-      display:flex;
-      max-width:80%;
-    }
-    .message-row.user{align-self:flex-end;justify-content:flex-end;}
-    .message-row.bot{align-self:flex-start;}
-    .message-avatar{
-      width:26px;height:26px;border-radius:999px;
-      background:#020617;
-      border:1px solid rgba(148,163,184,0.4);
-      display:flex;align-items:center;justify-content:center;
-      font-size:13px;font-weight:600;
-      margin-right:8px;
-      flex-shrink:0;
-    }
-    .message-row.user .message-avatar{
-      display:none;
-    }
-    .bubble{
-      padding:9px 11px;
-      border-radius:var(--radius-lg);
-      font-size:13px;
-      line-height:1.5;
-      border:1px solid rgba(148,163,184,0.25);
-      box-shadow:0 10px 30px rgba(0,0,0,0.5);
-    }
-    .bubble.bot{
-      background:var(--bg-message-bot);
-      border-top-left-radius:6px;
-    }
-    .bubble.user{
-      background:var(--bg-message-user);
-      border-top-right-radius:6px;
-    }
-    .bubble-footer{
-      display:flex;
-      justify-content:flex-end;
-      font-size:10px;
-      margin-top:5px;
-      color:var(--text-muted);
-      gap:4px;
-    }
-
-    /* Composer */
-    .composer-shell{
-      padding:12px 18px 16px;
-      border-top:1px solid var(--border-subtle);
-      background:linear-gradient(to top,rgba(15,23,42,0.98),rgba(15,23,42,0.96));
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .composer-top-hint{
-      font-size:10px;
-      color:var(--text-muted);
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-    .composer-top-hint span.hotkey{
-      padding:2px 5px;
-      border-radius:4px;
-      border:1px solid rgba(148,163,184,0.4);
-      font-size:9px;
-      letter-spacing:0.06em;
-      text-transform:uppercase;
-    }
-    .composer{
-      display:flex;
-      align-items:flex-end;
-      gap:10px;
-    }
-    .composer-box{
-      flex:1;
-      background:#020617;
-      border-radius:var(--radius-lg);
-      border:1px solid rgba(148,163,184,0.3);
-      padding:8px 12px;
-      display:flex;
-      align-items:flex-end;
-      gap:8px;
-    }
-    .composer-box textarea{
-      flex:1;
-      border:none;
-      outline:none;
-      background:transparent;
-      color:var(--text-main);
-      font-size:13px;
-      resize:none;
-      max-height:90px;
-    }
-    .composer-box textarea::placeholder{
-      color:var(--text-muted);
-    }
-    .composer-tools{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      color:var(--text-muted);
+    .messages-empty{
+      margin:auto;
+      text-align:center;
+      color:#8696a0;
       font-size:14px;
     }
-    .composer-tools i{
-      padding:4px;
-      border-radius:999px;
-      background:transparent;
-    }
-    .composer-send{
-      width:32px;height:32px;border-radius:999px;
-      border:none;
-      background:var(--accent);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:default;
-      color:#022c22;
-      box-shadow:0 0 0 1px rgba(15,23,42,0.9);
-    }
 
-    .composer-bottom-note{
-      font-size:10px;
-      color:var(--text-muted);
+    .msg-row{
       display:flex;
-      align-items:center;
-      gap:6px;
+      margin-bottom:6px;
+      max-width:80%;
     }
-    .composer-bottom-note i{
+    .msg-row.sent{margin-left:auto;justify-content:flex-end;}
+    .msg-row.received{margin-right:auto;}
+    .msg-bubble{
+      padding:8px 10px;
+      border-radius:8px;
+      font-size:13px;
+      line-height:1.4;
+      position:relative;
+      white-space:pre-wrap;
+      word-wrap:break-word;
+    }
+    .msg-bubble.sent{
+      background:#005c4b;
+      color:#e9edef;
+      border-bottom-right-radius:2px;
+    }
+    .msg-bubble.received{
+      background:#202c33;
+      color:#e9edef;
+      border-bottom-left-radius:2px;
+    }
+    .msg-meta{
+      margin-top:3px;
       font-size:11px;
+      color:#d1d7db;
+      text-align:right;
     }
 
-    /* Simple responsiveness */
-    @media (max-width:900px){
-      .app{
-        flex-direction:column;
-        height:100vh;
-        max-height:none;
-        border-radius:18px;
+    .input-area{
+      padding:10px 16px;
+      background:#202c33;
+      display:flex;
+      align-items:flex-end;
+      gap:10px;
+    }
+    .input-area textarea{
+      flex:1;
+      resize:none;
+      max-height:100px;
+      min-height:36px;
+      border-radius:8px;
+      border:none;
+      outline:none;
+      padding:8px 10px;
+      font-size:14px;
+      background:#111b21;
+      color:#e9edef;
+    }
+    .input-area button{
+      width:40px;height:40px;
+      border-radius:50%;
+      border:none;
+      background:#25d366;
+      color:#111b21;
+      font-size:18px;
+      cursor:pointer;
+    }
+
+    /* responsive */
+    @media (max-width:768px){
+      .sidebar{
+        width:35%;
+        min-width:220px;
       }
+    }
+    @media (max-width:640px){
+      .app{flex-direction:column;}
       .sidebar{
         width:100%;
-        min-width:0;
+        max-width:none;
         height:40%;
       }
-      .chat-main{
+      .chat{
         height:60%;
-      }
-    }
-    @media (max-width:600px){
-      .sidebar{
-        display:none; /* focus on pure ChatGPT layout on small screens */
-      }
-      .chat-main{
-        height:100%;
       }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <!-- LEFT: chat list mock (non-functional) -->
+    <!-- LEFT: chat list -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-header-left">
-          <div class="logo-dot">W</div>
-          <div>
-            <div style="font-size:13px;font-weight:500;">Chats</div>
-            <div class="sidebar-badge">Static mock</div>
-          </div>
-        </div>
-        <div class="sidebar-actions">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <i class="fa-regular fa-pen-to-square"></i>
-          <i class="fa-solid fa-ellipsis-vertical"></i>
+          <div class="avatar">Y</div>
+          <div class="sidebar-title">Chats (mock)</div>
         </div>
       </div>
-
       <div class="sidebar-search">
-        <div class="sidebar-search-inner">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" placeholder="Search or start a new chat" />
-        </div>
+        <input id="search" type="text" placeholder="Search chats (UI only)" />
       </div>
-
-      <div class="chat-list">
-        <div class="chat-item active">
-          <div class="chat-avatar">
-            A
-            <span class="chat-online-dot"></span>
-          </div>
-          <div class="Below is a **single static `index.html`** that gives you a clean, responsive **ChatGPT‑style layout**: left sidebar with conversations, main chat window, messages, input box, and send button. It is **UI only** (no real messaging logic), so you can focus purely on structure and styling. [web:11][web:19]
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>ChatGPT – Static Mock UI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Optional icons -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    :root{
-      --bg-main:#050509;
-      --bg-sidebar:#0f1720;
-      --bg-chat:#050509;
-      --bg-message-user:#0b7df2;
-      --bg-message-bot:#111827;
-      --border-subtle:#1f2933;
-      --text-primary:#f9fafb;
-      --text-secondary:#9ca3af;
-      --accent:#22c55e;
-    }
-    body{
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
-      background:radial-gradient(circle at top,#1f2933 0,#050509 55%);
-      color:var(--text-primary);
-      height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
-    .app-shell{
-      width:100%;
-      height:100vh;
-      max-width:1400px;
-      max-height:900px;
-      background:rgba(3,7,18,0.95);
-      backdrop-filter:blur(16px);
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow:0 24px 80px rgba(0,0,0,0.75);
-      display:flex;
-    }
-
-    /* SIDEBAR (LEFT) */
-    .sidebar{
-      width:280px;
-      min-width:240px;
-      max-width:320px;
-      background:linear-gradient(180deg,#020617,#020617 40%,#020617);
-      border-right:1px solid var(--border-subtle);
-      display:flex;
-      flex-direction:column;
-    }
-    .sidebar-header{
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom:1px solid var(--border-subtle);
-    }
-    .sidebar-logo{
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .logo-circle{
-      width:26px;
-      height:26px;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 20%,#22c55e,#16a34a 40%,#15803d 80%);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:16px;
-    }
-    .sidebar-title{
-      font-size:14px;
-      font-weight:500;
-    }
-    .sidebar-header .icon-btn{
-      width:28px;
-      height:28px;
-      border-radius:999px;
-      border:1px solid var(--border-subtle);
-      background:transparent;
-      color:var(--text-secondary);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:13px;
-      cursor:pointer;
-    }
-
-    .sidebar-new-chat{
-      padding:10px 12px;
-      border-bottom:1px solid var(--border-subtle);
-    }
-    .btn-new{
-      width:100%;
-      border-radius:999px;
-      border:1px solid #22c55e33;
-      background:linear-gradient(90deg,#16a34a,#22c55e);
-      color:#020617;
-      padding:8px 12px;
-      font-size:13px;
-      font-weight:500;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      cursor:pointer;
-    }
-    .btn-new i{font-size:13px;}
-
-    .sidebar-search{
-      padding:8px 12px;
-    }
-    .sidebar-search-inner{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      background:#020617;
-      border-radius:999px;
-      border:1px solid var(--border-subtle);
-      padding:6px 10px;
-      font-size:13px;
-      color:var(--text-secondary);
-    }
-    .sidebar-search-inner input{
-      flex:1;
-      border:none;
-      outline:none;
-      background:transparent;
-      color:var(--text-primary);
-      font-size:13px;
-    }
-
-    .conversation-list{
-      flex:1;
-      overflow-y:auto;
-      padding:4px 0;
-      scrollbar-width:thin;
-      scrollbar-color:#4b5563 transparent;
-    }
-    .conv-item{
-      padding:10px 12px;
-      display:flex;
-      align-items:flex-start;
-      gap:8px;
-      cursor:pointer;
-      transition:background .12s,border-color .12s;
-      border-left:3px solid transparent;
-    }
-    .conv-item:hover{
-      background:rgba(15,23,42,0.9);
-    }
-    .conv-item.active{
-      background:rgba(15,23,42,1);
-      border-left-color:var(--accent);
-    }
-    .conv-avatar{
-      width:26px;
-      height:26px;
-      border-radius:6px;
-      background:linear-gradient(145deg,#111827,#020617);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:13px;
-      color:var(--text-secondary);
-      flex-shrink:0;
-    }
-    .conv-content{
-      flex:1;
-      min-width:0;
-    }
-    .conv-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:2px;
-    }
-    .conv-title{
-      font-size:13px;
-      font-weight:500;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .conv-time{
-      font-size:11px;
-      color:var(--text-secondary);
-      flex-shrink:0;
-      margin-left:8px;
-    }
-    .conv-snippet{
-      font-size:12px;
-      color:var(--text-secondary);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .sidebar-footer{
-      padding:10px 12px;
-      border-top:1px solid var(--border-subtle);
-      font-size:11px;
-      color:var(--text-secondary);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    /* MAIN CHAT AREA (RIGHT) */
-    .chat-area{
-      flex:1;
-      background:radial-gradient(circle at top,#020617 0,#020617 40%,#020617);
-      display:flex;
-      flex-direction:column;
-    }
-    .chat-header{
-      height:54px;
-      border-bottom:1px solid var(--border-subtle);
-      padding:0 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .chat-header-left{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .chat-title{
-      font-size:14px;
-      font-weight:500;
-    }
-    .chat-subtitle{
-      font-size:11px;
-      color:var(--text-secondary);
-    }
-    .chat-header-right{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      color:var(--text-secondary);
-      font-size:13px;
-    }
-    .pill{
-      border-radius:999px;
-      border:1px solid var(--border-subtle);
-      padding:3px 8px;
-      font-size:11px;
-    }
-
-    .chat-scroll{
-      flex:1;
-      overflow-y:auto;
-      padding:16px 18px 18px;
-      scrollbar-width:thin;
-      scrollbar-color:#4b5563 transparent;
-    }
-    .chat-welcome{
-      max-width:700px;
-      margin:0 auto 12px;
-      text-align:center;
-      padding:18px 18px 18px;
-      border-radius:16px;
-      border:1px solid #1e293b;
-      background:radial-gradient(circle at top,#020617,#020617);
-    }
-    .chat-welcome h1{
-      font-size:18px;
-      margin-bottom:6px;
-      font-weight:600;
-    }
-    .chat-welcome p{
-      font-size:12px;
-      color:var(--text-secondary);
-    }
-
-    .message-list{
-      max-width:780px;
-      margin:0 auto;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .msg-row{
-      display:flex;
-      gap:8px;
-    }
-    .msg-row.user{justify-content:flex-end;}
-    .msg-avatar{
-      width:26px;
-      height:26px;
-      border-radius:6px;
-      background:#020617;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:13px;
-      color:var(--text-secondary);
-      flex-shrink:0;
-    }
-    .msg-bubble{
-      border-radius:12px;
-      padding:8px 10px;
-      font-size:13px;
-      line-height:1.5;
-      max-width:88%;
-      border:1px solid #1f2933;
-      background:var(--bg-message-bot);
-    }
-    .msg-row.user .msg-bubble{
-      background:var(--bg-message-user);
-      border-color:#0b7df2;
-    }
-    .msg-meta{
-      margin-top:4px;
-      font-size:11px;
-      color:var(--text-secondary);
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-
-    /* COMPOSER */
-    .chat-composer{
-      border-top:1px solid var(--border-subtle);
-      padding:10px 12px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .composer-inner{
-      display:flex;
-      align-items:flex-end;
-      gap:8px;
-    }
-    .composer-box{
-      flex:1;
-      border-radius:999px;
-      border:1px solid var(--border-subtle);
-      background:#020617;
-      padding:7px 12px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .composer-box textarea{
-      flex:1;
-      border:none;
-      outline:none;
-      resize:none;
-      background:transparent;
-      color:var(--text-primary);
-      font-size:13px;
-      max-height:80px;
-    }
-    .composer-box textarea::placeholder{
-      color:var(--text-secondary);
-    }
-    .composer-icons{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      color:var(--text-secondary);
-      font-size:14px;
-    }
-    .composer-send-btn{
-      width:34px;
-      height:34px;
-      border-radius:999px;
-      border:none;
-      background:linear-gradient(135deg,#22c55e,#16a34a);
-      color:#020617;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      font-size:15px;
-      flex-shrink:0;
-    }
-    .composer-note{
-      font-size:11px;
-      color:var(--text-secondary);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width:900px){
-      .app-shell{
-        border-radius:0;
-        max-height:none;
-        height:100vh;
-      }
-      .sidebar{
-        display:none;
-      }
-      .chat-area{
-        flex:1;
-      }
-      .chat-header{
-        padding:0 10px;
-      }
-      .chat-header-left{
-        gap:6px;
-      }
-      .chat-title{
-        font-size:13px;
-      }
-      .chat-scroll{
-        padding:12px 10px 12px;
-      }
-      .chat-welcome{
-        margin-bottom:8px;
-        padding:14px 12px;
-      }
-      .message-list{
-        padding:0 4px;
-      }
-      .composer-note{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="app-shell">
-    <!-- LEFT: STATIC CONVERSATION LIST (mock chat list) -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-          <div class="logo-circle">
-            <i class="fa-regular fa-message"></i>
-          </div>
-          <div class="sidebar-title">ChatGPT Mock</div>
-        </div>
-        <button class="icon-btn" aria-label="User">
-          <i class="fa-regular fa-user"></i>
-        </button>
-      </div>
-
-      <div class="sidebar-new-chat">
-        <button class="btn-new">
-          <i class="fa-solid fa-plus"></i>
-          New chat
-        </button>
-      </div>
-
-      <div class="sidebar-search">
-        <div class="sidebar-search-inner">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" placeholder="Search chats" />
-        </div>
-      </div>
-
-      <div class="conversation-list">
-        <div class="conv-item active">
-          <div class="conv-avatar">
-            <i class="fa-regular fa-star"></i>
-          </div>
-          <div class="conv-content">
-            <div class="conv-top">
-              <span class="conv-title">UI planning – ChatGPT</span>
-              <span class="conv-time">Today</span>
-            </div>
-            <div class="conv-snippet">Design a static ChatGPT interface layout…</div>
-          </div>
-        </div>
-
-        <div class="conv-item">
-          <div class="conv-avatar">
-            <i class="fa-regular fa-lightbulb"></i>
-          </div>
-          <div class="conv-content">
-            <div class="conv-top">
-              <span class="conv-title">Frontend ideas</span>
-              <span class="conv-time">Yesterday</span>
-            </div>
-            <div class="conv-snippet">Give me creative UI patterns for chat apps…</div>
-          </div>
-        </div>
-
-        <div class="conv-item">
-          <div class="conv-avatar">
-            <i class="fa-solid fa-code"></i>
-          </div>
-          <div class="conv-content">
-            <div class="conv-top">
-              <span class="conv-title">Dev notes</span>
-              <span class="conv-time">Mon</span>
-            </div>
-            <div class="conv-snippet">Explain how to structure a React chat layout…</div>
-          </div>
-        </div>
-      </div>
-
+      <div id="chatList" class="chat-list"></div>
       <div class="sidebar-footer">
-        <span>Static mock UI</span>
-        <span>v1 · Layout only</span>
+        <button id="newChatBtn">+ New chat</button>
       </div>
     </aside>
 
-    <!-- RIGHT: CHAT WINDOW (static content) -->
-    <main class="chat-area">
-      <!-- Header -->
+    <!-- RIGHT: conversation -->
+    <section class="chat">
       <header class="chat-header">
-        <div class="chat-header-left">
-          <div class="logo-circle" style="width:22px;height:22px;font-size:13px;">
-            <i class="fa-regular fa-message"></i>
-          </div>
-          <div>
-            <div class="chat-title">ChatGPT</div>
-            <div class="chat-subtitle">Static mock · UI only</div>
-          </div>
-        </div>
-        <div class="chat-header-right">
-          <span class="pill">GPT‑style layout</span>
-          <i class="fa-regular fa-moon"></i>
-          <i class="fa-solid fa-ellipsis-vertical"></i>
+        <div id="activeAvatar" class="avatar" style="width:36px;height:36px;">?</div>
+        <div class="chat-header-info">
+          <div id="activeName" class="chat-header-name">No chat selected</div>
+          <div id="activeStatus" class="chat-header-status">Select a contact to start talking.</div>
         </div>
       </header>
 
-      <!-- Messages -->
-      <section class="chat-scroll">
-        <div class="chat-welcome">
-          <h1>ChatGPT mock interface</h1>
-          <p>This is a static layout to understand the structure of a chatbot UI: chat window, messages, input box, and send button.</p>
+      <div id="messages" class="messages">
+        <div class="messages-empty">
+          This is a simple, client‑side chat mock.<br />
+          Pick a chat on the left or create a new one, then start typing.
         </div>
+      </div>
 
-        <div class="message-list">
-          <!-- Bot message -->
-          <div class="msg-row">
-            <div class="msg-avatar">
-              <i class="fa-regular fa-message"></i>
-            </div>
-            <div>
-              <div class="msg-bubble">
-                <p>Welcome to your ChatGPT‑style mock! This is a non‑functional UI focused purely on layout and visual structure.</p>
-                <div class="msg-meta">
-                  <span>12:03</span>
-                  <span>ChatGPT · design mock</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- User message -->
-          <div class="msg-row user">
-            <div>
-              <div class="msg-bubble">
-                <p>Show me how a simple chat interface is structured with HTML and CSS.</p>
-                <div class="msg-meta">
-                  <span>12:04</span>
-                  <span>You</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bot response -->
-          <div class="msg-row">
-            <div class="msg-avatar">
-              <i class="fa-regular fa-message"></i>
-            </div>
-            <div>
-              <div class="msg-bubble">
-                <p>This layout includes:</p>
-                <ul style="margin-left:16px;margin-top:4px;">
-                  <li>Sidebar with recent conversations.</li>
-                  <li>Central chat window for messages.</li>
-                  <li>Input area with text field and send button.</li>
-                </ul>
-                <div class="msg-meta">
-                  <span>12:05</span>
-                  <span>ChatGPT</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Composer (non‑functional) -->
-      <footer class="chat-composer">
-        <div class="composer-inner">
-          <div class="composer-box">
-            <div class="composer-icons">
-              <i class="fa-regular fa-face-smile"></i>
-            </div>
-            <textarea rows="1"
-                      placeholder="Message ChatGPT (static mock – send is disabled)"></textarea>
-            <div class="composer-icons">
-              <i class="fa-regular fa-paperclip"></i>
-            </div>
-          </div>
-          <button class="composer-send-btn" aria-label="Send (non-functional)">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </div>
-        <div class="composer-note">
-          <span>Layout only · No real messages are sent or received.</span>
-          <span>Resize the window to see how the UI adapts.</span>
-        </div>
-      </footer>
-    </main>
+      <div class="input-area">
+        <textarea id="messageInput" placeholder="Type a message and press Enter..."></textarea>
+        <button id="sendBtn">&#9658;</button>
+      </div>
+    </section>
   </div>
+
+  <script>
+    // ------ basic mock state ------
+    const chats = [
+      {
+        id: 'ali',
+        name: 'Ali',
+        lastMessage: 'Hey, this feels like a real chat 🙂',
+        lastTime: '10:25',
+        messages: [
+          { from: 'them', text: 'Assalam o Alaikum! This is a mock chat.', time: '10:23' },
+          { from: 'you',  text: 'Walaikum Salam! Looks good so far.', time: '10:24' },
+          { from: 'them', text: 'Send anything, I will reply automatically 😄', time: '10:25' }
+        ]
+      },
+      {
+        id: 'project',
+        name: 'Project Notes',
+        lastMessage: 'UI is working – next is backend.',
+        lastTime: '09:02',
+        messages: [
+          { from: 'you',  text: 'Layout first, logic later.', time: '09:00' },
+          { from: 'them', text: 'Exactly. Frontend is your playground.', time: '09:01' },
+          { from: 'them', text: 'UI is working – next is backend.', time: '09:02' }
+        ]
+      }
+    ];
+
+    let activeChatId = null;
+
+    const chatListEl     = document.getElementById('chatList');
+    const messagesEl     = document.getElementById('messages');
+    const activeNameEl   = document.getElementById('activeName');
+    const activeStatusEl = document.getElementById('activeStatus');
+    const activeAvatarEl = document.getElementById('activeAvatar');
+    const messageInput   = document.getElementById('messageInput');
+    const sendBtn        = document.getElementById('sendBtn');
+    const searchInput    = document.getElementById('search');
+    const newChatBtn     = document.getElementById('newChatBtn');
+
+    // ------ render chat list ------
+    function renderChatList(filter = '') {
+      chatListEl.innerHTML = '';
+      const lower = filter.toLowerCase();
+      chats.forEach(chat => {
+        if (!lower || chat.name.toLowerCase().includes(lower)) {
+          const item = document.createElement('div');
+          item.className = 'chat-item' + (chat.id === activeChatId ? ' active' : '');
+          item.dataset.id = chat.id;
+
+          item.innerHTML = `
+            <div class="chat-avatar">${chat.name[0].toUpperCase()}</div>
+            <div class="chat-info">
+              <div class="chat-top-row">
+                <div class="chat-name">${chat.name}</div>
+                <div class="chat-time">${chat.lastTime || ''}</div>
+              </div>
+              <div class="chat-preview">${chat.lastMessage || ''}</div>
+            </div>
+          `;
+
+          item.addEventListener('click', () => openChat(chat.id));
+          chatListEl.appendChild(item);
+        }
+      });
+    }
+
+    // ------ open a chat ------
+    function openChat(id) {
+      activeChatId = id;
+      const chat = chats.find(c => c.id === id);
+      if (!chat) return;
+
+      activeNameEl.textContent = chat.name;
+      activeAvatarEl.textContent = chat.name[0].toUpperCase();
+      activeStatusEl.textContent = 'Online (mock)';
+      renderMessages(chat);
+      renderChatList(searchInput.value);
+    }
+
+    // ------ render messages ------
+    function renderMessages(chat) {
+      messagesEl.innerHTML = '';
+      chat.messages.forEach(msg => {
+        const row = document.createElement('div');
+        row.className = 'msg-row ' + (msg.from === 'you' ? 'sent' : 'received');
+
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble ' + (msg.from === 'you' ? 'sent' : 'received');
+        bubble.textContent = msg.text;
+
+        const meta = document.createElement('div');
+        meta.className = 'msg-meta';
+        meta.textContent = msg.time;
+        bubble.appendChild(meta);
+
+        row.appendChild(bubble);
+        messagesEl.appendChild(row);
+      });
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    // ------ send message ------
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text || !activeChatId) return;
+
+      const chat = chats.find(c => c.id === activeChatId);
+      const now  = new Date();
+      const time = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+
+      const newMsg = { from:'you', text, time };
+      chat.messages.push(newMsg);
+      chat.lastMessage = text;
+      chat.lastTime    = time;
+
+      messageInput.value = '';
+      autoResize();
+      renderMessages(chat);
+      renderChatList(searchInput.value);
+
+      // fake reply so it feels like a human
+      setTimeout(() => {
+        const replies = [
+          'Got it 👍',
+          'Haha, that works 😄',
+          'This is only a mock, but it feels real enough!',
+          'Your UI skills are doing the heavy lifting here.',
+          'Messages stay in memory only – no backend yet.'
+        ];
+        const replyText = replies[Math.floor(Math.random() * replies.length)];
+        const replyMsg = { from:'them', text:replyText, time };
+        chat.messages.push(replyMsg);
+        chat.lastMessage = replyText;
+        renderMessages(chat);
+        renderChatList(searchInput.value);
+      }, 700 + Math.random() * 800);
+    }
+
+    // textarea auto‑resize
+    function autoResize() {
+      messageInput.style.height = 'auto';
+      messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+    }
+
+    messageInput.addEventListener('input', autoResize);
+
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    // search (UI only)
+    searchInput.addEventListener('input', () => {
+      renderChatList(searchInput.value);
+    });
+
+    // create a new chat
+    newChatBtn.addEventListener('click', () => {
+      const name = prompt('Contact name:');
+      if (!name) return;
+      const id = name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now();
+      const chat = {
+        id,
+        name,
+        lastMessage: '',
+        lastTime: '',
+        messages: []
+      };
+      chats.unshift(chat);
+      renderChatList(searchInput.value);
+      openChat(id);
+    });
+
+    // initial render
+    renderChatList();
+  </script>
 </body>
 </html>
-
-   
